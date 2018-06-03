@@ -1,19 +1,21 @@
 package com.AVLTree;
 
-import java.util.*;
-
 /**
- * <h4>Node of an AVLTreeView</h4>
- * Supports generic Data.
+ * Basic building block of an AVLTree.
+ * <br>Contains generic Data and at most a reference to a left and right AVLNode.
+ * <br>Supports generic Data.
  * @author mjsch
- * @param <T>
+ * @param <T> extends Comparable<T>.
  */
-public class AVLNode<T extends Comparable<T>>
+public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>
 {
     T data;
     AVLNode left;
     AVLNode right;
 
+    /**
+     * Creates an AVLNode with given data and no Child AVLNodes (i.e. left = right = null).
+     */
     public AVLNode(T data)
     {
         this.data = data;
@@ -21,35 +23,48 @@ public class AVLNode<T extends Comparable<T>>
     }
 
     /**
-     * Returns the highest subtree connected to this AVLNodeView.
-     * @return
+     * @inheritdoc
      */
-    public int getMaxHeightSubtrees()
-    {
-        int leftHeight = 0, rightHeight = 0;
-
-        if (this.left != null)
-            leftHeight = this.left.getMaxHeightSubtrees();
-        if (this.right != null)
-            rightHeight = this.right.getMaxHeightSubtrees();
-        return 1 + Math.max(leftHeight, rightHeight); // +1 is parent node. max-height of subtrees.
-    }
-
+    @Override
     public boolean isLeaf()
     {
         return (right == null && left == null);
     }
 
-    public AVLNode<T> right()
+    /**
+     * @inheritdoc
+     */
+    @Override
+    public int height()
     {
-        return right;
+        int leftHeight = 0, rightHeight = 0;
+
+        if (this.left != null)
+            leftHeight = this.left.height();
+        if (this.right != null)
+            rightHeight = this.right.height();
+        return 1 + Math.max(leftHeight, rightHeight);
     }
 
+    /**
+     * @inheritDoc
+     */
     public AVLNode<T> left()
     {
         return left;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public AVLNode<T> right()
+    {
+        return right;
+    }
+
+    /**
+     * @inheritDoc
+     */
     @Override
     public String toString()
     {

@@ -3,8 +3,9 @@ package com.AVLTree;
 import java.util.*;
 
 /**
+ * An AVLTree is a self-balancing BinarySearchTree. This fact ensures worstCase: <font color=aqua>O( log (n) )</font> for all Operations on this kind of tree.
  * @author mjsch
- * @param <T>
+ * @param <T> extends Comparable<T>.
  */
 public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
 {
@@ -22,12 +23,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * - Adds 'element' to the AVLTree.
-     * <br>- If 'element' already resides in the AVLTree a 'NodeAlreadyExistsException' is thrown and immediately handled.
-     * <br>- Since this an AVLTree, the add Method automatically detects an inbalance after a new element has been added and
-     * rebalances the whole tree.
-     * <br>- Due to the balanced structure of this tree, every single operation is at worst <font color=aqua>O( log (n) ).</font>
-     * @param element element to add
+     * @inheritDoc
      */
     @Override
     public void add(T element)
@@ -97,61 +93,36 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     *
-     * @param node
-     * @return
+     * @inheritDoc
      */
-    private AVLNode<T> leftRotate(AVLNode<T> node) // node = 1
+    @Override
+    public void delete(T element)
     {
-        AVLNode<T> right = node.right; // right = 2
-        node.right = right.left; // 1.right = null
-        right.left = node; // 2.left = 1
-
-        if (node == root)
-            root = right;
-
-        return right;
-    }
-
-    /**
-     *
-     * @param node
-     * @return
-     */
-    private AVLNode<T> rightRotate(AVLNode<T> node) // EXAMPLE: node = 3
-    {
-        AVLNode<T> left = node.left; // left = 2
-        node.left = left.right; // 3.left = null
-        left.right = node; // 2.right = 3
-
-        if (node == root)
-            root = left;
-
-        return left;
-    }
-
-    /**
-     * Calculates balance-factor of this Tree.
-     * @return balance-factor
-     */
-    public int balance(AVLNode<T> root)
-    {
-        return (height(root.right) - height(root.left));
-    }
-
-    /**
-     * Returns true if Tree is balanced. Otherwise false.
-     * A Tree is balanced if every AVLNode fulfills -2 < balance-factor < 2.
-     * @return
-     */
-    public boolean isBalanced(AVLNode<T> root)
-    {
-        return (balance(root) == 1 || balance(root) == 0 || balance(root) == -1);
-    }
-
-    private T findSmallestElement(AVLNode root)
-    {
-        return root.left == null ? (T) root.data : findSmallestElement(root.left); // Why is cast needed here ? Should be same Type.
+        if (isEmpty())
+        {
+            try
+            {
+                throw new TreeIsEmptyException("You can't delete something in an empty tree.");
+            } catch (TreeIsEmptyException e)
+            {
+                e.printStackTrace();
+            }
+            return;
+        }
+        if (!contains(element))
+        {
+            try
+            {
+                throw new NodeDoesNotExistException("'" + element.toString() + "' is not in the tree.");
+            } catch (NodeDoesNotExistException e)
+            {
+                e.printStackTrace();
+            }
+            return;
+        }
+        if (root.data.equals(element))
+            root = deleteRecursive(root, element);
+        deleteRecursive(root, element);
     }
 
     private AVLNode deleteRecursive(AVLNode current, T element)
@@ -190,34 +161,13 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         return current;
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
-    public void delete(T element)
+    public boolean contains(T element)
     {
-        if (isEmpty())
-        {
-            try
-            {
-                throw new TreeIsEmptyException("You can't delete something in an empty tree.");
-            } catch (TreeIsEmptyException e)
-            {
-                e.printStackTrace();
-            }
-            return;
-        }
-        if (!contains(element))
-        {
-            try
-            {
-                throw new NodeDoesNotExistException("'" + element.toString() + "' is not in the tree.");
-            } catch (NodeDoesNotExistException e)
-            {
-                e.printStackTrace();
-            }
-            return;
-        }
-        if (root.data.equals(element))
-            root = deleteRecursive(root, element);
-        deleteRecursive(root, element);
+        return containsRecursive(root, element);
     }
 
     private boolean containsRecursive(AVLNode current, T element)
@@ -234,19 +184,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Returns true if element is present in this AVLTree. Otherwise false.
-     * @param element element to search
-     * @return
-     */
-    @Override
-    public boolean contains(T element)
-    {
-        return containsRecursive(root, element);
-    }
-
-    /**
-     * Returns true if this AVLTree is empty. Otherwise false.
-     * @return
+     * @inheritDoc
      */
     @Override
     public boolean isEmpty()
@@ -255,23 +193,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Help Method for numNodes().
-     * @param node
-     * @return
-     */
-    private int numNodesRecursive(AVLNode node)
-    {
-        if (node != null)
-        {
-            return
-                    numNodesRecursive(node.left) + numNodesRecursive(node.right) + 1;
-        }
-        return 0;
-    }
-
-    /**
-     * Returns the number of Nodes in the AVLTree.
-     * @return
+     * @inheritDoc
      */
     @Override
     public int numNodes()
@@ -288,7 +210,104 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     public int height(AVLNode<T> root)
     {
         if (root != null)
-            return root.getMaxHeightSubtrees();
+            return root.height();
+        return 0;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public AVLNode<T> leftRotate(AVLNode<T> node) // node = 1
+    {
+        AVLNode<T> right = node.right; // right = 2
+        node.right = right.left; // 1.right = null
+        right.left = node; // 2.left = 1
+
+        if (node == root)
+            root = right;
+
+        return right;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public AVLNode<T> rightRotate(AVLNode<T> node) // EXAMPLE: node = 3
+    {
+        // Dreieckstausch.
+        AVLNode<T> left = node.left; // left = 2
+        node.left = left.right; // 3.left = null
+        left.right = node; // 2.right = 3
+
+        if (node == root)
+            root = left;
+
+        return left;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public int balance(AVLNode<T> root)
+    {
+        return (height(root.right) - height(root.left));
+    }
+
+    /**
+     * @inheritDoc
+     * @return String
+     */
+    @Override
+    public String toString()
+    {
+        return  "Name: " + name
+                + "\n\tisEmpty: " + isEmpty()
+                + "\n\tNumNodes: " + numNodes()
+                + "\n\tHeight: " + height(root)
+                + "\n\tPreOrder: " + traversePreOrder(root)
+                + "\n\tInOrder: " + traverseInOrder(root)
+                + "\n\tPostOrder: " + traversePostOrder(root)
+                + "\n\tIsBalanced: " + isBalanced(root)
+                + "\n\tBalanceFactorsInOrder: " + traverseBalanceFactorsInOrder(root)
+                + "\n\tPrintLevelWise: "  + "\n" + traverseLevelWise(root);
+    }
+
+    /**
+     * Checks wheter or not Tree is balanced.
+     * <br>A Tree is balanced if every AVLNode fulfills "-2 < balance-factor < 2".
+     * @return Returns true if Tree is balanced. Otherwise false.
+     */
+    public boolean isBalanced(AVLNode<T> root)
+    {
+        return (balance(root) == 1 || balance(root) == 0 || balance(root) == -1);
+    }
+
+    /**
+     * Finds smallest Data in AVLTree specified by root AVLNode and returns that Data.
+     * <br><font color=aqua>Remember:</font> All AVLNodes in the left Subtree of a root AVLNode are smaller than that root AVLNode.
+     * @param root
+     * @return Smallest Data
+     */
+    private T findSmallestElement(AVLNode root)
+    {
+        return root.left == null ? (T) root.data : findSmallestElement(root.left); // Why is cast needed here ? Should be same Type.
+    }
+
+    /**
+     * Help Method for numNodes().
+     * @param node
+     * @return
+     */
+    private int numNodesRecursive(AVLNode node)
+    {
+        if (node != null)
+        {
+            return
+                    numNodesRecursive(node.left) + numNodesRecursive(node.right) + 1;
+        }
         return 0;
     }
 
@@ -426,27 +445,12 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         return s;
     }
 
+    /**
+     * Returns name of this AVLTree.
+     * @return
+     */
     public String name()
     {
         return name;
-    }
-
-    /**
-     * @inheritDoc
-     * @return String
-     */
-    @Override
-    public String toString()
-    {
-        return  "Name: " + name
-                + "\n\tisEmpty: " + isEmpty()
-                + "\n\tNumNodes: " + numNodes()
-                + "\n\tHeight: " + height(root)
-                + "\n\tPreOrder: " + traversePreOrder(root)
-                + "\n\tInOrder: " + traverseInOrder(root)
-                + "\n\tPostOrder: " + traversePostOrder(root)
-                + "\n\tIsBalanced: " + isBalanced(root)
-                + "\n\tBalanceFactorsInOrder: " + traverseBalanceFactorsInOrder(root)
-                + "\n\tPrintLevelWise: "  + "\n" + traverseLevelWise(root);
     }
 }
