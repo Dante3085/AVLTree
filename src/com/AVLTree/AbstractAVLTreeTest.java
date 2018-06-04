@@ -19,7 +19,7 @@ public abstract class AbstractAVLTreeTest
     @Test
     public void isEmpty()
     {
-        assertTrue("new Tree must be empty!", tree.isEmpty());
+        assertTrue("new Tree must be empty!", tree.isEmpty(tree.root()));
         System.out.println("Test: 'isEmpty' has been successful.");
     }
 

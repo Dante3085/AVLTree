@@ -28,16 +28,16 @@ public interface IAVLTree<T extends Comparable<T>>
     boolean contains( T element );
 
     /**
-     * Checks if the AVlTree is empty.
+     * Checks if the AVlTree specified by the given root AVLNode is empty.
      * @return True if root is null. Otherwise false.
      */
-    boolean isEmpty();
+    boolean isEmpty(AVLNode<T> root);
 
     /**
-     * Calculates the number of AVLNodes in this tree.
+     * Calculates the number of AVLNodes in the AVLTree specified by it's root AVLNode.
      * @return 0 if root is null. Otherwise number of AVlNodes.
      */
-    int numNodes();
+    int numNodes(AVLNode<T> root);
 
     /**
      * Calculates the length of the longest downward path from the root AVLNode to a leaf. A.k.a. the height of the tree.
@@ -71,6 +71,12 @@ public interface IAVLTree<T extends Comparable<T>>
      * @return
      */
     int balance(AVLNode<T> root);
+
+    /**
+     * Returns root of this AVLTree.
+     * @return
+     */
+    AVLNode<T> root();
 
     /**
      * Compiles a String with all there is to know about this AVLTree.
