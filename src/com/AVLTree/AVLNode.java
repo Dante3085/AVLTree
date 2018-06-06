@@ -10,8 +10,10 @@ package com.AVLTree;
 public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>
 {
     T data;
-    AVLNode left;
-    AVLNode right;
+    AVLNode<T> left;
+    AVLNode<T> right;
+
+    // private int height;
 
     /**
      * Creates an AVLNode with given data and no Child AVLNodes (i.e. left = right = null).

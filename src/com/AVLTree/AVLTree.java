@@ -1,5 +1,9 @@
 package com.AVLTree;
 
+import com.util.Util;
+
+import javax.swing.*;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -9,52 +13,45 @@ import java.util.*;
  */
 public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
 {
-    private AVLNode<T> root;
-    private String name;
+    private AVLNode<T> m_root;
+    private String m_name;
 
     /**
-     * Creates an AVLTree with an empty root and the given name.
+     * Creates an AVLTree with an empty m_root and the given m_name.
      * @param name
      */
     public AVLTree(String name)
     {
-        root = null;
-        this.name = name;
+        m_root = null;
+        m_name = name;
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    public void add(T element)
+    public void add(T element) throws NodeAlreadyExistsException
     {
-        if (isEmpty(root))
+        if (isEmpty(m_root))
         {
-            root = new AVLNode(element); // TODO: Unchecked Assignment ???
+            m_root = new AVLNode<T>(element); // TODO: Unchecked Assignment ???
             return;
         }
-
-        try
-        {
-            if (contains(element))
-                throw new NodeAlreadyExistsException("'" + element.toString() + "' already exists in the tree.");
-        } catch (NodeAlreadyExistsException e)
-        {
-            e.printStackTrace();
-        }
-        root = addRecursive(root, element);
+        m_root = addRecursive(m_root, element);
     }
 
     /**
      * Recursive Help-Method for add().
      * @return
      */
-    private AVLNode addRecursive(AVLNode current, T element)
+    private AVLNode<T> addRecursive(AVLNode<T> current, T element) throws NodeAlreadyExistsException
     {
         // Ist man den passenden Pfad zum Einfügen des neuen Elements bis zum Ende durchgelaufen, so kann man an der leeren Stelle das neue Element einfügen,
         // bzw. den neuen Knoten als Linken oder Rechten Nachfolger nach oben geben.
         if (current == null)
-            return new AVLNode(element);
+            return new AVLNode<T>(element);
+        else if (current.data.equals(element))
+            throw new NodeAlreadyExistsException("'" + element.toString() + "' already exists in the AVLTree.");
 
         // int cmp = element.compareTo((T) current.data); // TODO: Warum muss ich hier current.data nach T casten ?
 
@@ -62,12 +59,15 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         {
             current.right = addRecursive(current.right, element);
 
+            int balanceCurrent = balance(current);
+            int balanceCurrentRight = balance(current.right);
+
             // Kein Knick (Kein Vorzeichenwechsel) => Links-Rotation
-            if (balance(current) == 2 && balance(current.right) > 0)
+            if (balanceCurrent == 2 && balanceCurrentRight > 0)
                 current = leftRotate(current);
 
             // Vorzeichenwechsel (Knick) => Rechts-Links-Rotation
-            else if (balance(current) == 2 && balance(current.right) < 0)
+            else if (balanceCurrent == 2 && balanceCurrentRight < 0)
             {
                 current.right = rightRotate(current.right);
                 current = leftRotate(current);
@@ -78,12 +78,15 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         {
             current.left = addRecursive(current.left, element);
 
+            int balanceCurrent = balance(current);
+            int balanceCurrentLeft = balance(current.left);
+
             // Kein Knick (Kein Vorzeichenwechsel) => Rechts-Rotation
-            if (balance(current) == -2 && balance(current.left) < 0)
+            if (balanceCurrent == -2 && balanceCurrentLeft < 0)
                 current = rightRotate(current);
 
             // Vorzeichenwechsel (Knick) => Links-Rechts-Rotation
-            else if (balance(current) == -2 && balance(current.left) > 0)
+            else if (balanceCurrent == -2 && balanceCurrentLeft > 0)
             {
                 current.left = leftRotate(current.left);
                 current = rightRotate(current);
@@ -97,100 +100,112 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
      * @inheritDoc
      */
     @Override
-    public void delete(T element)
+    public void delete(T element) throws TreeIsEmptyException, NodeDoesNotExistException
     {
-        if (isEmpty(root))
-        {
-            try
-            {
-                throw new TreeIsEmptyException("You can't delete something in an empty tree.");
-            } catch (TreeIsEmptyException e)
-            {
-                e.printStackTrace();
-            }
-            return;
-        }
-        if (!contains(element))
-        {
-            try
-            {
-                throw new NodeDoesNotExistException("'" + element.toString() + "' is not in the tree.");
-            } catch (NodeDoesNotExistException e)
-            {
-                e.printStackTrace();
-            }
-            return;
-        }
-        if (root.data.equals(element))
-            root = deleteRecursive(root, element);
-        deleteRecursive(root, element);
-
-        InOrderBalancing(root);
+        if (isEmpty(m_root))
+            throw new TreeIsEmptyException("Tree is empty");
+        deleteRecursive(m_root, element);
     }
 
-    /**
-     * TODO: Incorporate this method's functionality into method 'delete()'. Then DELETE THIS METHOD.
-     * @param root
-     * @return
-     */
-    private AVLNode<T> InOrderBalancing(AVLNode<T> root)
+    private AVLNode<T> deleteRecursive(AVLNode<T> current, T element) throws NodeDoesNotExistException
     {
-        if (root == null)
-            return null;
-
-        InOrderBalancing(root.left);
-
-        if (balance(root) == 2 && balance(root.right) > 0)
-            root = leftRotate(root);
-        else if (balance(root) == -2 && balance(root.right) < 0)
-            root = rightRotate(root);
-        else if (balance(root) == -2 && balance(root.left) > 0)
-        {
-            root.left = leftRotate(root.left);
-            root = rightRotate(root);
-        }
-
-        InOrderBalancing(root.right);
-        return root;
-    }
-
-    private AVLNode deleteRecursive(AVLNode current, T element)
-    {
+        // TODO: Where throw NodeDoesNotExistException ?
+        // No AVLNode in this tree contains element.
         if (current == null)
-            return null;
-
-        // Found element Node.
-        if (element == current.data)
         {
-            // Node is a leaf (i.e. Node has no Children.).
-            if (current.left == null && current.right == null)
-                return null;
-
-            // Node has one Child. Return non-null Child, so it can be assigned to new Parent.
-            if (current.right == null)
-                return current.left;
-
-            if (current.left == null)
-                return current.right;
-
-            // Node has two Children. Find smallest Value in Right-Subtree (Subtree with all values that are bigger than root.)
-            T smallestValue = findSmallestElement(current.right);
-            current.data = smallestValue;
-            current.right = deleteRecursive(current.right, smallestValue);
-
-            return current;
+            System.out.println("Element does not reside in the tree.");
+            return null;
         }
 
+        // Found AVLNode that contains element.
+        if (element.equals(current.data))
+        {
+            // AVLNode is a leaf (i.e. AVLNode has no Children.).
+            if (current.left == null && current.right == null)
+            {
+                return null;
+            }
+
+            // AVLNode has no right child => return left Child.
+            if (current.right == null)
+            {
+                return current.left;
+            }
+
+            // AVLNode has no left child => return right Child.
+            if (current.left == null)
+            {
+                return current.right;
+            }
+
+            // AVLNode has both children => Find smallest AVLNode in right subtree. That AVLNode will replace the deleted AVLNode.
+            AVLNode<T> smallestValue = findSmallestElement(current.right);
+            smallestValue.left = current.left;
+            deleteRecursive(current.right, smallestValue.data);
+            return smallestValue;
+        }
+
+        // Value of current AVLNode is bigger than element => GO LEFT
         if (current.data.compareTo(element) > 0)
         {
             current.left = deleteRecursive(current.left, element);
 
-            return current;
+            int balanceCurrent = balance(current);
+            int balanceCurrentRight = balance(current.right);
+
+            if (balanceCurrent == 2 && balanceCurrentRight >= 0)
+                current = leftRotate(current);
+            else if (balanceCurrent == 2 && balanceCurrentRight < 0)
+            {
+                current.right = rightRotate(current.right);
+                current = leftRotate(current);
+            }
         }
 
-        current.right = deleteRecursive(current.right, element);
+        // Value of current AVLNode is smaller than element => GO RIGHT
+        else if (current.data.compareTo(element) < 0)
+        {
+            current.right = deleteRecursive(current.right, element);
+
+            int balanceCurrent = balance(current);
+            int balanceCurrentLeft = balance(current.left);
+
+            if (balanceCurrent == -2 && balanceCurrentLeft <= 0)
+                current = rightRotate(current);
+            else if (balanceCurrent == -2 && balanceCurrentLeft > 0)
+            {
+                current.left = leftRotate(current.left);
+                current = rightRotate(current);
+            }
+        }
         return current;
     }
+
+//    /**
+//     * TODO: Incorporate this method's functionality into method 'delete()'. Then DELETE THIS METHOD.
+//     * @param root
+//     * @return
+//     */
+//    private AVLNode<T> InOrderBalancing(AVLNode<T> root)
+//    {
+//        if (root == null)
+//            return null;
+//
+//        InOrderBalancing(root.left);
+//
+//        if (balance(root) == 2 && balance(root.right) > 0)
+//            root = leftRotate(root);
+//        else if (balance(root) == -2 && balance(root.right) < 0)
+//            root = rightRotate(root);
+//        else if (balance(root) == -2 && balance(root.left) > 0)
+//        {
+//            root.left = leftRotate(root.left);
+//            root = rightRotate(root);
+//        }
+//
+//        InOrderBalancing(root.right);
+//        return root;
+//    }
 
     /**
      * @inheritDoc
@@ -198,10 +213,10 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     @Override
     public boolean contains(T element)
     {
-        return containsRecursive(root, element);
+        return containsRecursive(m_root, element);
     }
 
-    private boolean containsRecursive(AVLNode current, T element)
+    private boolean containsRecursive(AVLNode<T> current, T element)
     {
         if (current == null)
             return false;
@@ -237,7 +252,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
      * @param root
      * @return
      */
-    private int numNodesRecursive(AVLNode root)
+    private int numNodesRecursive(AVLNode<T> root)
     {
         if (!isEmpty(root))
             return (numNodesRecursive(root.left) + numNodesRecursive(root.right) + 1);
@@ -245,7 +260,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Calculates height of a tree. The tree is specified by it's root.
+     * Calculates height of a tree. The tree is specified by it's m_root.
      * @param root
      * @return
      */
@@ -267,8 +282,8 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         node.right = right.left; // 1.right = null
         right.left = node; // 2.left = 1
 
-        if (node == root)
-            root = right;
+        if (node == m_root)
+            m_root = right;
 
         return right;
     }
@@ -284,8 +299,8 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         node.left = left.right; // 3.left = null
         left.right = node; // 2.right = 3
 
-        if (node == root)
-            root = left;
+        if (node == m_root)
+            m_root = left;
 
         return left;
     }
@@ -301,31 +316,40 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Return root of this AVLTree.
+     * Return m_root of this AVLTree.
      * @return
      */
     @Override
-    public AVLNode root()
+    public AVLNode<T> root()
     {
-        return root;
+        return m_root;
+    }
+
+    @Override
+    public void flush()
+    {
+        m_root = null;
     }
 
     /**
      * @inheritDoc
      */
+    // TODO: Changed toString(). Now writes compiled String into a .txt File aswell.
     @Override
     public String toString()
     {
-        return  "Name: " + name
-                + "\n\tisEmpty: " + isEmpty(root)
-                + "\n\tNumNodes: " + numNodes(root)
-                + "\n\tHeight: " + height(root)
-                + "\n\tPreOrder: " + traversePreOrder(root)
-                + "\n\tInOrder: " + traverseInOrder(root)
-                + "\n\tPostOrder: " + traversePostOrder(root)
-                + "\n\tIsBalanced: " + isBalanced(root)
-                + "\n\tBalanceFactorsInOrder: " + traverseBalanceFactorsInOrder(root)
-                + "\n\tPrintLevelWise: "  + "\n" + traverseLevelWise(root);
+        String s = "Name: " + m_name
+                + "\n\tisEmpty: " + isEmpty(m_root)
+                + "\n\tNumNodes: " + numNodes(m_root)
+                + "\n\tHeight: " + height(m_root)
+                + "\n\tPreOrder: " + traversePreOrder(m_root)
+                + "\n\tInOrder: " + traverseInOrder(m_root)
+                + "\n\tPostOrder: " + traversePostOrder(m_root)
+                + "\n\tIsBalanced: " + isBalanced(m_root)
+                + "\n\tBalanceFactorsInOrder: " + traverseBalanceFactorsInOrder(m_root)
+                + "\n\tPrintLevelWise: "  + "\n" + traverseLevelWise(m_root);
+        Util.writeToFile("AVLTree.txt", s);
+        return s;
     }
 
     /**
@@ -340,20 +364,36 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
 
     /**
      * Finds smallest Data in AVLTree specified by root AVLNode and returns that Data.
-     * <br><font color=aqua>Remember:</font> All AVLNodes in the left Subtree of a root AVLNode are smaller than that root AVLNode.
+     * <br><font color=aqua>Remember:</font> All AVLNodes in the left Subtree of a m_root AVLNode are smaller than that m_root AVLNode.
      * @param root
      * @return Smallest Data
      */
-    private T findSmallestElement(AVLNode root)
+//    private T findSmallestElement(AVLNode<T> root)
+//    {
+//        return (root.left == null) ? (T)root.data : findSmallestElement(root.left); // Why is cast needed here ? Should be same Type.
+//    }
+
+    private AVLNode<T> findSmallestElement(AVLNode<T> root)
     {
-        return root.left == null ? (T) root.data : findSmallestElement(root.left); // Why is cast needed here ? Should be same Type.
+        return (root.left == null) ? root : findSmallestElement(root.left);
     }
 
     /**
-     * Traverses a tree specified by it's root AVLNode in PreOrder and returns a String with all AVLNodes in that Order.
+     * Finds biggest Data in AVLTree specified by m_root AVLNode and returns that Data.
+     * <br><font color=aqua>Remember:</font> All AVLNodes in the right Subtree of a m_root AVLNode are bigger than that m_root AVLNode.
+     * @param root
+     * @return Biggest Data
+     */
+    private T findBiggestElement(AVLNode<T> root)
+    {
+        return (root.right == null) ? (T)root.data : findBiggestElement(root.right);
+    }
+
+    /**
+     * Traverses a tree specified by it's m_root AVLNode in PreOrder and returns a String with all AVLNodes in that Order.
      * @param node
      */
-    public String traversePreOrder(AVLNode node)
+    public String traversePreOrder(AVLNode<T> node)
     {
         String s = "";
         if (node == null)
@@ -369,10 +409,10 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Traverses a tree specified by it's root AVLNode in InOrder and returns a String with all AVLNodes in that Order.
+     * Traverses a tree specified by it's m_root AVLNode in InOrder and returns a String with all AVLNodes in that Order.
      * @param node
      */
-    public String traverseInOrder(AVLNode node) // TODO: Change JavaDoc for all print...Order methods.
+    public String traverseInOrder(AVLNode<T> node) // TODO: Change JavaDoc for all print...Order methods.
     {
         String s = "";
         if (node == null)
@@ -387,10 +427,10 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Traverses a tree specified by it's root AVLNode in PostOrder and returns a String with all AVLNodes in that Order.
+     * Traverses a tree specified by it's m_root AVLNode in PostOrder and returns a String with all AVLNodes in that Order.
      * @param node
      */
-    public String traversePostOrder(AVLNode node)
+    public String traversePostOrder(AVLNode<T> node)
     {
         String s = "";
         if (node == null)
@@ -458,7 +498,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
 
     /**
      * Returns a String with balance-factors of all AVLNodes traversed InOrder.
-     * @param root Tree is specified by it's root.
+     * @param root Tree is specified by it's m_root.
      */
     public String traverseBalanceFactorsInOrder(AVLNode<T> root)
     {
@@ -466,7 +506,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         if (root == null)
             return "";
         s += traverseBalanceFactorsInOrder(root.left);
-        //System.out.print(balance(root) + ", ");
+        //System.out.print(balance(m_root) + ", ");
         s += balance(root) + ", ";
         s += traverseBalanceFactorsInOrder(root.right);
 
@@ -475,11 +515,11 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Returns name of this AVLTree.
+     * Returns m_name of this AVLTree.
      * @return
      */
     public String name()
     {
-        return name;
+        return m_name;
     }
 }

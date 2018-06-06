@@ -11,14 +11,14 @@ public interface IAVLTree<T extends Comparable<T>>
      * If the element is already contained, an appropriate Exception is thrown.
      * @param element element to add
      */
-    void add( T element );
+    void add( T element ) throws NodeAlreadyExistsException;
 
     /**
      * Removes the given element from the AVLTree if present. Automatically rebalances AVLTree if necessary.
      * TODO: Currently doesn't rebalance AVLTree.
      * @param element element to remove
      */
-    void delete( T element );
+    void delete( T element ) throws TreeIsEmptyException, NodeDoesNotExistException;
 
     /**
      * Checks if the given element resides in the AVLTree.
@@ -77,6 +77,12 @@ public interface IAVLTree<T extends Comparable<T>>
      * @return
      */
     AVLNode<T> root();
+
+    /**
+     * Empties this AVLTree.
+     * This AVLTree's root is set to null.
+     */
+    void flush();
 
     /**
      * Compiles a String with all there is to know about this AVLTree.
