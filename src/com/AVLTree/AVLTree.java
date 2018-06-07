@@ -164,7 +164,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
             }
 
             // balanceCurrent = -2 => Overweight in left subtree.
-            else
+            else if (balanceCurrent == -2)
             {
                 int balanceCurrentLeft = balance(current.left);
 

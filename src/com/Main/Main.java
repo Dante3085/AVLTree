@@ -13,13 +13,15 @@ public class Main
 
         try
         {
-            a.add(5);
-            a.add(2);
-            a.add(16);
-            a.add(1);
-            a.add(4);
-            a.add(222);
+            for (int i = 1; i <= 7; i++)
+                a.add(i);
             a.add(0);
+            a.add(20);
+            a.add(30);
+            a.add(14);
+            a.add(16);
+            a.add(18);
+            a.add(15);
         } catch (NodeAlreadyExistsException e)
         {
             e.printStackTrace();
@@ -28,6 +30,9 @@ public class Main
 
         try
         {
+            a.delete(16);
+            a.delete(30);
+            a.delete(14);
             a.delete(4);
         } catch (TreeIsEmptyException e)
         {
