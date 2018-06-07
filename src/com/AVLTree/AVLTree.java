@@ -2,15 +2,15 @@ package com.AVLTree;
 
 import com.util.Util;
 
-import javax.swing.*;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * An AVLTree is a self-balancing BinarySearchTree. This fact ensures worstCase: <font color=aqua>O( log (n) )</font> for all Operations on this kind of tree.
+ * - An AVLTree is a self-balancing BinarySearchTree. This fact ensures worstCase: <font color=aqua>O( log (n) )</font> for all Operations on this kind of BinarySearchTree.
+ * <br> Conventions: 1. Names of Object-attributes are preceded with 'm_'.
  * @author mjsch
  * @param <T> extends Comparable<T>.
  */
+// TODO: Mache allgemein anwendbare Methoden static ?!
 public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
 {
     private AVLNode<T> m_root;
@@ -104,12 +104,11 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     {
         if (isEmpty(m_root))
             throw new TreeIsEmptyException("Tree is empty");
-        deleteRecursive(m_root, element);
+        m_root = deleteRecursive(m_root, element);
     }
 
     private AVLNode<T> deleteRecursive(AVLNode<T> current, T element) throws NodeDoesNotExistException
     {
-        // TODO: Where throw NodeDoesNotExistException ?
         // No AVLNode in this tree contains element.
         if (current == null)
         {
@@ -138,11 +137,48 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
                 return current.right;
             }
 
-            // AVLNode has both children => Find smallest AVLNode in right subtree. That AVLNode will replace the deleted AVLNode.
-            AVLNode<T> smallestValue = findSmallestElement(current.right);
-            smallestValue.left = current.left;
-            deleteRecursive(current.right, smallestValue.data);
-            return smallestValue;
+            // REMEMBER: The following section is ONLY executed when the AVLNode has 2 Children.
+            // AVLNode has 2 children => Find smallest Key in right subtree and replace current.data with it.
+            T smallestKey = findSmallestKey(current.right); // Find smallest key in right subtree and remember it.
+            current.data = smallestKey; // Override current data with smallestKey.
+            current.right = deleteRecursive(current.right, smallestKey); // Delete AVLNode that originally had smallestKey.
+            // return current; // Then return the changed subtree.
+
+            int balanceCurrent = balance(current);
+
+            // balanceCurrent = +2 => Overweight in right subtree.
+            if (balanceCurrent == 2)
+            {
+                int balanceCurrentRight = balance(current.right);
+
+                // balanceCurrentRight >= 0 => No change of sign (kein Vorzeichenwechsel) => no crinkle (kein Knick) => simple Left-Rotation.
+                if (balanceCurrentRight >= 0)
+                    current = leftRotate(current);
+
+                // balanceCurrentRight < 0 => Change of sign (Vorzeichenwechsel) => crinkle (Knick) => Right-Left-Rotation.
+                else
+                {
+                    current.right = rightRotate(current.right);
+                    current = leftRotate(current);
+                }
+            }
+
+            // balanceCurrent = -2 => Overweight in left subtree.
+            else
+            {
+                int balanceCurrentLeft = balance(current.left);
+
+                // balanceCurrentLeft <= 0 => No change of sign (kein Vorzeichenwechsel) => no crinkle (kein Knick) => simple Right-Rotation.
+                if (balanceCurrentLeft <= 0)
+                    current = rightRotate(current);
+
+                // balanceCurrentLeft > 0 => Change of sign (Vorzeichenwechsel) => crinkle (Knick) => Left-Right-Rotation.
+                else
+                {
+                    current.left = leftRotate(current.left);
+                    current = rightRotate(current);
+                }
+            }
         }
 
         // Value of current AVLNode is bigger than element => GO LEFT
@@ -181,51 +217,33 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         return current;
     }
 
-//    /**
-//     * TODO: Incorporate this method's functionality into method 'delete()'. Then DELETE THIS METHOD.
-//     * @param root
-//     * @return
-//     */
-//    private AVLNode<T> InOrderBalancing(AVLNode<T> root)
-//    {
-//        if (root == null)
-//            return null;
-//
-//        InOrderBalancing(root.left);
-//
-//        if (balance(root) == 2 && balance(root.right) > 0)
-//            root = leftRotate(root);
-//        else if (balance(root) == -2 && balance(root.right) < 0)
-//            root = rightRotate(root);
-//        else if (balance(root) == -2 && balance(root.left) > 0)
-//        {
-//            root.left = leftRotate(root.left);
-//            root = rightRotate(root);
-//        }
-//
-//        InOrderBalancing(root.right);
-//        return root;
-//    }
-
     /**
      * @inheritDoc
      */
+    // TODO: Soll in Zukunft einen AVLNode Parameter haben, damit in beliebigen AVLTrees gesucht werden kann.
     @Override
     public boolean contains(T element)
     {
         return containsRecursive(m_root, element);
     }
 
-    private boolean containsRecursive(AVLNode<T> current, T element)
+    /**
+     * Recursive Help-Method for contains(T element).
+     * <br>Returns 'true' if element is found. Otherwise 'false'.
+     * @param root Root AVLNode of AVLTree in which element is searched.
+     * @param element Element (Key) which is searched for.
+     * @return 'True' if element is found. Otherwise false.
+     */
+    private boolean containsRecursive(AVLNode<T> root, T element)
     {
-        if (current == null)
+        if (root == null)
             return false;
-        if (element == current.data)
+        if (element == root.data)
             return true;
-        if (current.data.compareTo(element) < 0)
-            return containsRecursive(current.right, element);
-        if (current.data.compareTo(element) > 0)
-            return containsRecursive(current.left, element);
+        if (root.data.compareTo(element) < 0)
+            return containsRecursive(root.right, element);
+        if (root.data.compareTo(element) > 0)
+            return containsRecursive(root.left, element);
         return false;
     }
 
@@ -248,9 +266,9 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Help Method for numNodes().
-     * @param root
-     * @return
+     * Recursive Help-Method for numNodes(AVLNode<T> root).
+     * @param root Root AVLNode of AVLTree of which it's number of AVLNodes is being calculated.
+     * @return '0' if root is null. Otherwise number of AVLNodes.
      */
     private int numNodesRecursive(AVLNode<T> root)
     {
@@ -260,9 +278,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
-     * Calculates height of a tree. The tree is specified by it's m_root.
-     * @param root
-     * @return
+     * @inheritDoc
      */
     @Override
     public int height(AVLNode<T> root)
@@ -310,9 +326,9 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
      * @inheritDoc
      */
     @Override
-    public int balance(AVLNode<T> root)
+    public int balance(AVLNode<T> node)
     {
-        return (isEmpty(root)) ? -1 : (height(root.right) - height(root.left));
+        return (isEmpty(node)) ? -1 : (height(node.right) - height(node.left));
     }
 
     /**
@@ -368,25 +384,9 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
      * @param root
      * @return Smallest Data
      */
-//    private T findSmallestElement(AVLNode<T> root)
-//    {
-//        return (root.left == null) ? (T)root.data : findSmallestElement(root.left); // Why is cast needed here ? Should be same Type.
-//    }
-
-    private AVLNode<T> findSmallestElement(AVLNode<T> root)
+    private T findSmallestKey(AVLNode<T> root)
     {
-        return (root.left == null) ? root : findSmallestElement(root.left);
-    }
-
-    /**
-     * Finds biggest Data in AVLTree specified by m_root AVLNode and returns that Data.
-     * <br><font color=aqua>Remember:</font> All AVLNodes in the right Subtree of a m_root AVLNode are bigger than that m_root AVLNode.
-     * @param root
-     * @return Biggest Data
-     */
-    private T findBiggestElement(AVLNode<T> root)
-    {
-        return (root.right == null) ? (T)root.data : findBiggestElement(root.right);
+        return (root.left == null) ? (T)root.data : findSmallestKey(root.left); // Why is cast needed here ? Should be same Type.
     }
 
     /**

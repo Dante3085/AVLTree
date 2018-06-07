@@ -29,19 +29,22 @@ public interface IAVLTree<T extends Comparable<T>>
 
     /**
      * Checks if the AVlTree specified by the given root AVLNode is empty.
-     * @return True if root is null. Otherwise false.
+     * @param root Root AVLNode of AVLTree which is being checked.
+     * @return 'True' if root is null. Otherwise 'false'.
      */
     boolean isEmpty(AVLNode<T> root);
 
     /**
      * Calculates the number of AVLNodes in the AVLTree specified by it's root AVLNode.
-     * @return 0 if root is null. Otherwise number of AVlNodes.
+     * @param root Root AVLNode of AVLTree of which it's number of AVLNodes is being calculated.
+     * @return '0' if root is null. Otherwise number of AVLNodes.
      */
     int numNodes(AVLNode<T> root);
 
     /**
      * Calculates the length of the longest downward path from the root AVLNode to a leaf. A.k.a. the height of the tree.
-     * @return 0 if root is null. Otherwise height of the tree.
+     * @param root Root AVLNode of AVLTree of which it's height is being calculated.
+     * @return '0' if root is null. Otherwise height of the tree.
      */
     int height(AVLNode<T> root);
 
@@ -51,8 +54,8 @@ public interface IAVLTree<T extends Comparable<T>>
      * <br>- If node is root, puts former node.right as root.
      * <br>- <font color=aqua>Visual:</font> Imagine 3 nodes going from top to diagonally lower right. The top node will go to the left of the node inbetween.
      * <br>If the inbetween node had a left before that, it will now go to the right of the former top node.
-     * @param node
-     * @return
+     * @param node AVLNode on which the left-rotation is being performed.
+     * @return Highest AVLNode that is part of the resulting structure after the left-rotation. TODO: Veränderungsbedarf
      */
     AVLNode<T> leftRotate(AVLNode<T> node);
 
@@ -62,15 +65,19 @@ public interface IAVLTree<T extends Comparable<T>>
      * <br>- If node is root, puts former node.left as new root.
      * <br>- <font color=aqua>Visual:</font> Imagine 3 nodes going from top to diagonally lower left. The top node will go to the right of the node inbetween.
      * <br>If the inbetween node had a right before that, it will now go to the left of the former top node.
+     * @param node AVLNode on which the right-rotation is being performed.
+     * @return Highest AVLNode that is part of the resulting structure after the left-rotation. TODO: Veränderungsbedarf
      */
     AVLNode<T> rightRotate(AVLNode<T> node);
 
     /**
-     * Calculates the balance of a Tree or the given AVLNode.
-     * @param root
-     * @return
+     * Calculates the balance-factor of a given AVLNode.
+     * <br>The balance-factor can be understood as the number of AVLNodes that the left / right subtree of the given AVLNode has more than the other subtree.
+     * (negative sign => left subtree has more; positive sign => right subtree has more.)
+     * @param node AVLNode of which the balance-factor is being calculated.
+     * @return The balance-factor of the given AVLNode.
      */
-    int balance(AVLNode<T> root);
+    int balance(AVLNode<T> node);
 
     /**
      * Returns root of this AVLTree.

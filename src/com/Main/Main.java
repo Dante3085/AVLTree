@@ -14,30 +14,28 @@ public class Main
         try
         {
             a.add(5);
-            a.add(3);
-            a.add(10);
             a.add(2);
-            a.add(7);
-            a.add(13);
-            a.add(14);
+            a.add(16);
+            a.add(1);
+            a.add(4);
+            a.add(222);
+            a.add(0);
         } catch (NodeAlreadyExistsException e)
         {
             e.printStackTrace();
         }
-
         System.out.println(a);
 
-        //try
-        //{
-        //    a.delete(10);
-        //} catch (TreeIsEmptyException e)
-        //{
-        //    e.printStackTrace();
-        //} catch (NodeDoesNotExistException e)
-        //{
-        //    e.printStackTrace();
-        //}
-
+        try
+        {
+            a.delete(4);
+        } catch (TreeIsEmptyException e)
+        {
+            e.printStackTrace();
+        } catch (NodeDoesNotExistException e)
+        {
+            e.printStackTrace();
+        }
         System.out.println(a);
     }
 }
