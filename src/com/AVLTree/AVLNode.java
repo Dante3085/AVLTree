@@ -7,30 +7,53 @@ package com.AVLTree;
  * @author mjsch
  * @param <T> extends Comparable<T>.
  */
-public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>
+// TODO: Balance in AVLNodes direkt beim Einfügen abspeichern. Die balance-Berechnung bei jedem add / delete ist sehr aufwending.
+public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>, TreePrinter.PrintableNode
 {
+    // TODO: Diese 3 Attribute sollten vielleicht private sein ?
     T data;
     AVLNode<T> left;
     AVLNode<T> right;
 
-    // private int height;
+    private int heightLeftSubtree;
+    private int heightRightSubtree;
 
     /**
      * Creates an AVLNode with given data and no Child AVLNodes (i.e. left = right = null).
+     * <br>Height of left and right subtrees are set to 0.
      */
     public AVLNode(T data)
     {
         this.data = data;
         left = right = null;
+        heightLeftSubtree = heightRightSubtree = 0;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     @Override
     public boolean isLeaf()
     {
         return (right == null && left == null);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public int balance()
+    {
+        return heightRightSubtree - heightLeftSubtree;
+    }
+
+    /**
+     * Sets heightLeftSubtree and heightRightSubtree to 0, if this AVLNode is a leaf. Otherwise does nothing.
+     */
+    public void resetSubtreeHeights()
+    {
+        if (isLeaf())
+            heightLeftSubtree = heightRightSubtree = 0;
     }
 
     /**
@@ -62,6 +85,26 @@ public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>
     public AVLNode<T> right()
     {
         return right;
+    }
+
+    public int HeightLeftSubtree()
+    {
+        return heightLeftSubtree;
+    }
+
+    public void setHeightLeftSubtree(int heightLeftSubtree)
+    {
+        this.heightLeftSubtree = heightLeftSubtree;
+    }
+
+    public int HeightRightSubtree()
+    {
+        return heightRightSubtree;
+    }
+
+    public void setHeightRightSubtree(int heightRightSubtree)
+    {
+        this.heightRightSubtree = heightRightSubtree;
     }
 
     /**

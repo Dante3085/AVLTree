@@ -12,6 +12,13 @@ public interface IAVLNode<T extends Comparable<T>>
     boolean isLeaf();
 
     /**
+     * Calculates the AVLNode's balance-factor and returns it.
+     * <br>Formula: heightRightSubtree - heightLeftSubtree
+     * @return balance-factor
+     */
+    int balance();
+
+    /**
      * Calculates the height of the AVLTree from which this AVLNode is root.
      * <br>This AVLNode is seen as the root AVLNode of that AVLTree.
      * @return

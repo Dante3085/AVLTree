@@ -111,10 +111,8 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     {
         // No AVLNode in this tree contains element.
         if (current == null)
-        {
-            System.out.println("Element does not reside in the tree.");
+
             return null;
-        }
 
         // Found AVLNode that contains element.
         if (element.equals(current.data))
