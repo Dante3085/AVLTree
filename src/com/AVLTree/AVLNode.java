@@ -15,8 +15,7 @@ public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>, TreePrinte
     AVLNode<T> left;
     AVLNode<T> right;
 
-    private int heightLeftSubtree;
-    private int heightRightSubtree;
+    public int height;
 
     /**
      * Creates an AVLNode with given data and no Child AVLNodes (i.e. left = right = null).
@@ -26,7 +25,7 @@ public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>, TreePrinte
     {
         this.data = data;
         left = right = null;
-        heightLeftSubtree = heightRightSubtree = 0;
+        height = 1;
     }
 
     /**
@@ -44,30 +43,28 @@ public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>, TreePrinte
     @Override
     public int balance()
     {
-        return heightRightSubtree - heightLeftSubtree;
-    }
+    int rightHeight = 0, leftHeight = 0;
+    if (right!= null)
+        rightHeight = right.height;
+    if (left != null)
+        leftHeight = left.height;
 
-    /**
-     * Sets heightLeftSubtree and heightRightSubtree to 0, if this AVLNode is a leaf. Otherwise does nothing.
-     */
-    public void resetSubtreeHeights()
-    {
-        if (isLeaf())
-            heightLeftSubtree = heightRightSubtree = 0;
-    }
+    return rightHeight - leftHeight;
+}
 
     /**
      * @inheritdoc
      */
+    // TODO: Change in functionality.
     @Override
     public int height()
     {
         int leftHeight = 0, rightHeight = 0;
 
-        if (this.left != null)
-            leftHeight = this.left.height();
-        if (this.right != null)
-            rightHeight = this.right.height();
+        if (left != null)
+            leftHeight = left.height;
+        if (right != null)
+            rightHeight = right.height;
         return 1 + Math.max(leftHeight, rightHeight);
     }
 
@@ -85,26 +82,6 @@ public class AVLNode<T extends Comparable<T>> implements IAVLNode<T>, TreePrinte
     public AVLNode<T> right()
     {
         return right;
-    }
-
-    public int HeightLeftSubtree()
-    {
-        return heightLeftSubtree;
-    }
-
-    public void setHeightLeftSubtree(int heightLeftSubtree)
-    {
-        this.heightLeftSubtree = heightLeftSubtree;
-    }
-
-    public int HeightRightSubtree()
-    {
-        return heightRightSubtree;
-    }
-
-    public void setHeightRightSubtree(int heightRightSubtree)
-    {
-        this.heightRightSubtree = heightRightSubtree;
     }
 
     /**

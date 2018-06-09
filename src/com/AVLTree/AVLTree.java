@@ -55,41 +55,96 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
 
         // int cmp = element.compareTo((T) current.data); // TODO: Warum muss ich hier current.data nach T casten ?
 
+        // curren.data is smaller than element => GO RIGHT
         else if (current.data.compareTo(element) < 0)    // < 0 means that current.data is smaller than element TODO: Unchecked call to ... warning message.
         {
             current.right = addRecursive(current.right, element);
 
-            int balanceCurrent = balance(current);
-            int balanceCurrentRight = balance(current.right);
+//            int balanceCurrent = balance(current);
+//            int balanceCurrentRight = balance(current.right);
+//
+//            // Kein Knick (Kein Vorzeichenwechsel) => Links-Rotation
+//            if (balanceCurrent == 2 && balanceCurrentRight > 0)
+//                current = leftRotate(current);
+//
+//            // Vorzeichenwechsel (Knick) => Rechts-Links-Rotation
+//            else if (balanceCurrent == 2 && balanceCurrentRight < 0)
+//            {
+//                current.right = rightRotate(current.right);
+//                current = leftRotate(current);
+//            }
 
-            // Kein Knick (Kein Vorzeichenwechsel) => Links-Rotation
-            if (balanceCurrent == 2 && balanceCurrentRight > 0)
-                current = leftRotate(current);
+            if (current.left == null & current.right != null)
+                current.height = current.right.height + 1;
+            else if (current.left != null & current.right == null)
+                current.height = current.left.height + 1;
+            else
+                current.height = Math.max(current.left.height, current.right.height) + 1;
 
-            // Vorzeichenwechsel (Knick) => Rechts-Links-Rotation
-            else if (balanceCurrent == 2 && balanceCurrentRight < 0)
+            int balanceCurrent = current.balance();
+
+            // balanceCurrent = +2 => Overweight in right subtree.
+            if (balanceCurrent == 2)
             {
-                current.right = rightRotate(current.right);
-                current = leftRotate(current);
+                // It's only necessary to calculate balance of right AVLNode if overweight has already been detected. So, don't do this calculation outside of this block.
+                int balanceCurrentRight = current.right.balance();
+
+                // balanceCurrentRight >= 0 => No change of sign (kein Vorzeichenwechsel) => no crinkle (kein Knick) => simple Left-Rotation.
+                if (balanceCurrentRight >= 0)
+                    current = leftRotate(current);
+
+                // balanceCurrentRight < 0 => Change of sign (Vorzeichenwechsel) => crinkle (Knick) => Right-Left-Rotation.
+                else if (balanceCurrentRight < 0)
+                {
+                    current.right = rightRotate(current.right);
+                    current = leftRotate(current);
+                }
             }
         }
 
+        // current.data is bigger than element => GO LEFT
         else if (current.data.compareTo(element) > 0)   // > 0 means that current.data is bigger than element.
         {
             current.left = addRecursive(current.left, element);
 
-            int balanceCurrent = balance(current);
-            int balanceCurrentLeft = balance(current.left);
+//            int balanceCurrent = balance(current);
+//            int balanceCurrentLeft = balance(current.left);
+//
+//            // Kein Knick (Kein Vorzeichenwechsel) => Rechts-Rotation
+//            if (balanceCurrent == -2 && balanceCurrentLeft < 0)
+//                current = rightRotate(current);
+//
+//            // Vorzeichenwechsel (Knick) => Links-Rechts-Rotation
+//            else if (balanceCurrent == -2 && balanceCurrentLeft > 0)
+//            {
+//                current.left = leftRotate(current.left);
+//                current = rightRotate(current);
+//            }
 
-            // Kein Knick (Kein Vorzeichenwechsel) => Rechts-Rotation
-            if (balanceCurrent == -2 && balanceCurrentLeft < 0)
-                current = rightRotate(current);
+            if (current.left == null & current.right != null)
+                current.height = current.right.height + 1;
+            else if (current.left != null & current.right == null)
+                current.height = current.left.height + 1;
+            else
+                current.height = Math.max(current.left.height, current.right.height) + 1;
+            System.out.println("height(" + current.toString() + ") = " + current.height);
 
-            // Vorzeichenwechsel (Knick) => Links-Rechts-Rotation
-            else if (balanceCurrent == -2 && balanceCurrentLeft > 0)
+            int balanceCurrent = current.balance();
+            System.out.println("balanceCurrent = " + balanceCurrent);
+            if (balanceCurrent == -2)
             {
-                current.left = leftRotate(current.left);
-                current = rightRotate(current);
+                int balanceCurrentLeft = current.left.balance();
+
+                // balanceCurrentLeft <= 0 => No change of sign (kein Vorzeichenwechsel) => no crinkle (kein Knick) => simple Right-Rotation.
+                if (balanceCurrentLeft <= 0)
+                    current = rightRotate(current);
+
+                // balanceCurrentLeft > 0 => Change of sign (Vorzeichenwechsel) => crinkle (Knick) => Left-Right-Rotation.
+                else if (balanceCurrentLeft > 0)
+                {
+                    current.left = leftRotate(current.left);
+                    current = rightRotate(current);
+                }
             }
         }
         return current;
@@ -355,7 +410,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         String s = "Name: " + m_name
                 + "\n\tisEmpty: " + isEmpty(m_root)
                 + "\n\tNumNodes: " + numNodes(m_root)
-                + "\n\tHeight: " + height(m_root)
+                + "\n\tHeight: " + m_root.height // TODO: Gibt falschen Wert zurück.
                 + "\n\tPreOrder: " + traversePreOrder(m_root)
                 + "\n\tInOrder: " + traverseInOrder(m_root)
                 + "\n\tPostOrder: " + traversePostOrder(m_root)
