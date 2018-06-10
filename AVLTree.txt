@@ -1,14 +1,12 @@
 Name: AVLTree
 	isEmpty: false
-	NumNodes: 10
-	Height: 4
-	PreOrder: 5, 2, 1, 0, 3, 7, 6, 18, 15, 20, 
-	InOrder: 0, 1, 2, 3, 5, 6, 7, 15, 18, 20, 
-	PostOrder: 0, 1, 3, 2, 6, 15, 20, 18, 7, 5, 
+	NumNodes: 3
+	Height: 2
+	PreOrder: 2, 1, 3, 
+	InOrder: 1, 2, 3, 
+	PostOrder: 1, 3, 2, 
 	IsBalanced: true
-	BalanceFactorsInOrder: 0, -1, -1, 0, 0, 0, 1, 0, 0, 0, 
+	BalanceFactorsInOrder: 0, 0, 0, 
 	PrintLevelWise: 
-	5 
-	2 	7 
-	1 	3 	6 	18 
-	0 	15 	20 
+	2 
+	1 	3 

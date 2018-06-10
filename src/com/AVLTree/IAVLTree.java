@@ -28,25 +28,22 @@ public interface IAVLTree<T extends Comparable<T>>
     boolean contains( T element );
 
     /**
-     * Checks if the AVlTree specified by the given root AVLNode is empty.
-     * @param root Root AVLNode of AVLTree which is being checked.
-     * @return 'True' if root is null. Otherwise 'false'.
+     * Checks if this AVlTree is empty.
+     * @return 'True' if m_root is null. Otherwise 'false'.
      */
-    boolean isEmpty(AVLNode<T> root);
+    boolean isEmpty();
 
     /**
-     * Calculates the number of AVLNodes in the AVLTree specified by it's root AVLNode.
-     * @param root Root AVLNode of AVLTree of which it's number of AVLNodes is being calculated.
+     * Calculates the number of AVLNodes in this AVLTree.
      * @return '0' if root is null. Otherwise number of AVLNodes.
      */
-    int numNodes(AVLNode<T> root);
+    int numNodes();
 
     /**
-     * Calculates the length of the longest downward path from the root AVLNode to a leaf. A.k.a. the height of the tree.
-     * @param root Root AVLNode of AVLTree of which it's height is being calculated.
+     * Calculates the length of the longest downward path from the root AVLNode of this Tree to a leaf. A.k.a. the height of the tree.
      * @return '0' if root is null. Otherwise height of the tree.
      */
-    int height(AVLNode<T> root);
+    int height();
 
     /**
      * - Puts node.right as node.right.left

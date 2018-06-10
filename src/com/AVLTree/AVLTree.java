@@ -252,7 +252,17 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
      * @inheritDoc
      */
     @Override
-    public boolean isEmpty(AVLNode<T> root)
+    public boolean isEmpty()
+    {
+        return m_root == null;
+    }
+
+    /**
+     * Checks if the AVlTree specified by the given root AVLNode is empty.
+     * @param root Root AVLNode of AVLTree which is being checked.
+     * @return 'True' if root is null. Otherwise 'false'.
+     */
+    public static <T extends Comparable<T>> boolean isEmpty(AVLNode<T> root)
     {
         return root == null;
     }
@@ -261,13 +271,13 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
      * @inheritDoc
      */
     @Override
-    public int numNodes(AVLNode<T> root)
+    public int numNodes()
     {
-        return numNodesRecursive(root);
+        return numNodesRecursive(m_root);
     }
 
     /**
-     * Recursive Help-Method for numNodes(AVLNode<T> root).
+     * Recursive Help-Method for numNodes().
      * @param root Root AVLNode of AVLTree of which it's number of AVLNodes is being calculated.
      * @return '0' if root is null. Otherwise number of AVLNodes.
      */
@@ -279,10 +289,46 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     }
 
     /**
+     * Calculates the number of AVLNodes in the AVLTree specified by it's root AVLNode.
+     * @param root Root AVLNode of AVLTree of which it's number of AVLNodes is being calculated.
+     * @param <T> Type parameter for AVLNode. Extends Comparable<T>.
+     * @return '0' if root is null. Otherwise number of AVLNodes.
+     */
+    public static <T extends Comparable<T>> int numNodes(AVLNode<T> root)
+    {
+        return numNodesRecursiveS(root);
+    }
+
+    /**
+     * Recursive Help-Method for "numNodes(AVLNode<T> root)"
+     * @param root Root AVLNode of AVLTree of which it's number of AVLNodes is being calculated.
+     * @param <T> Type parameter for AVLNode. Extends Comparable<T>.
+     * @return '0' if root is null. Otherwise number of AVLNodes.
+     */
+    private static <T extends Comparable<T>> int numNodesRecursiveS(AVLNode<T> root)
+    {
+        if (!isEmpty(root))
+            return (numNodesRecursiveS(root.left) + numNodesRecursiveS(root.right) + 1);
+        return 0;
+    }
+
+    /**
      * @inheritDoc
      */
     @Override
-    public int height(AVLNode<T> root)
+    public int height()
+    {
+        if (m_root != null)
+            return m_root.height();
+        return 0;
+    }
+
+    /**
+     * Calculates the length of the longest downward path from the root AVLNode to a leaf. A.k.a. the height of the tree.
+     * @param root Root AVLNode of AVLTree of which it's height is being calculated.
+     * @return '0' if root is null. Otherwise height of the tree.
+     */
+    public static <T extends Comparable<T>> int height(AVLNode<T> root)
     {
         if (root != null)
             return root.height();
@@ -356,9 +402,9 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     public String toString()
     {
         String s = "Name: " + m_name
-                + "\n\tisEmpty: " + isEmpty(m_root)
-                + "\n\tNumNodes: " + numNodes(m_root)
-                + "\n\tHeight: " + height(m_root)
+                + "\n\tisEmpty: " + isEmpty()
+                + "\n\tNumNodes: " + numNodes()
+                + "\n\tHeight: " + height()
                 + "\n\tPreOrder: " + traversePreOrder(m_root)
                 + "\n\tInOrder: " + traverseInOrder(m_root)
                 + "\n\tPostOrder: " + traversePostOrder(m_root)

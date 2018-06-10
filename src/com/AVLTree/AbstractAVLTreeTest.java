@@ -19,7 +19,7 @@ public abstract class AbstractAVLTreeTest
     @Test
     public void test_isEmpty()
     {
-        assertTrue("new Tree must be empty!", tree.isEmpty(tree.root()));
+        assertTrue("new Tree must be empty!", tree.isEmpty());
     }
 
     @Test
@@ -47,14 +47,14 @@ public abstract class AbstractAVLTreeTest
         {
             e.printStackTrace();
         }
-        assertTrue("tree.numNodes() must be 10", tree.numNodes(tree.root()) == 10);
+        assertTrue("tree.numNodes() must be 10", tree.numNodes() == 10);
     }
 
     @Test
     public void test_flush()
     {
         tree.flush();
-        assertTrue("tree.isEmpty() should be true.", tree.isEmpty(tree.root()));
+        assertTrue("tree.isEmpty() should be true.", tree.isEmpty());
     }
 
     /**
@@ -72,6 +72,6 @@ public abstract class AbstractAVLTreeTest
         {
             e.printStackTrace();
         }
-        assertTrue("tree.height() should be 3", tree.height(tree.root()) == 3);
+        assertTrue("tree.height() should be 3", tree.height() == 3);
     }
 }
