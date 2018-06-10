@@ -11,6 +11,7 @@ import java.util.*;
  * @param <T> extends Comparable<T>.
  */
 // TODO: Mache allgemein anwendbare Methoden static ?!
+    // Change
 public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
 {
     private AVLNode<T> m_root;
