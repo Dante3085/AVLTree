@@ -13,9 +13,21 @@ public class Main
 
         try
         {
-            a.add(1);
-            a.add(3);
+            a.add(107);
+            a.add(77);
+            a.add(50);
+            a.add(83);
+            a.add(140);
+            a.add(62);
+            a.add(33);
             a.add(2);
+            a.add(69);
+            a.add(36);
+            a.add(12);
+            a.add(32);
+            a.add(104);
+            a.add(18);
+            a.add(101);
         } catch (NodeAlreadyExistsException e)
         {
             e.printStackTrace();

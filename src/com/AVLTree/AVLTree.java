@@ -35,7 +35,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     {
         if (isEmpty(m_root))
         {
-            m_root = new AVLNode<T>(element); // TODO: Unchecked Assignment ???
+            m_root = new AVLNode<T>(element);
             return;
         }
         m_root = addRecursive(m_root, element);
@@ -52,7 +52,10 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         if (current == null)
             return new AVLNode<T>(element);
         else if (current.data.equals(element))
-            throw new NodeAlreadyExistsException("'" + element.toString() + "' already exists in the AVLTree.");
+        {
+            System.out.println("'" + element.toString() + "' already exists in the AVLTree.");
+            // throw new NodeAlreadyExistsException("'" + element.toString() + "' already exists in the AVLTree.");
+        }
 
         // int cmp = element.compareTo((T) current.data); // TODO: Warum muss ich hier current.data nach T casten ?
 
@@ -104,7 +107,10 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     public void delete(T element) throws TreeIsEmptyException, NodeDoesNotExistException
     {
         if (isEmpty(m_root))
-            throw new TreeIsEmptyException("Tree is empty");
+        {
+            System.out.println("Tree is empty.");
+            // throw new TreeIsEmptyException("Tree is empty");
+        }
         m_root = deleteRecursive(m_root, element);
     }
 
@@ -113,7 +119,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         // No AVLNode in this tree contains element.
         if (current == null)
         {
-            System.out.println("Element does not reside in the tree.");
+            System.out.println("Element '" + element.toString() + "' does not reside in the tree.");
             return null;
         }
 
@@ -142,13 +148,13 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
             // AVLNode has 2 children => Find smallest Key in right subtree and replace current.data with it.
             T smallestKey = findSmallestKey(current.right); // Find smallest key in right subtree and remember it.
             current.data = smallestKey; // Override current data with smallestKey.
-            current.right = deleteRecursive(current.right, smallestKey); // Delete AVLNode that originally had smallestKey.
+            current.right = deleteNoBalanceRecursive(current.right, smallestKey); // Delete AVLNode that originally had smallestKey. // TODO: NICHT BALANCIEREN
             // return current; // Then return the changed subtree.
 
             int balanceCurrent = balance(current);
 
             // balanceCurrent = +2 => Overweight in right subtree.
-            if (balanceCurrent == 2)
+            if (balanceCurrent == 2) // TODO: Kann komplett ausgeschlossen werden, da aus dem rechten teilbaum genommen wird.
             {
                 int balanceCurrentRight = balance(current.right);
 
@@ -218,6 +224,49 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         return current;
     }
 
+    //public void deleteNoBalance(AVLNode<T> node, T element)
+    //{
+    //    if (isEmpty(m_root))
+    //        System.out.println("BinarySearchTree is empty!");
+//
+    //    node = deleteNoBalanceRecursive(node, element);
+    //}
+
+    private AVLNode<T> deleteNoBalanceRecursive(AVLNode<T> current, T element)
+    {
+        // Element does not exist.
+        if (current == null)
+        {
+            System.out.println("'" + element.toString() + "' does not reside in the Tree.");
+            return null;
+        }
+
+        // Found element
+        if (element == current.data)
+        {
+            // Node is a leaf (i.e. Node has no Children.).
+            if (current.left == null && current.right == null)
+                return null;
+
+            // Node has one Child. Return non-null Child, so it can be assigned to new Parent.
+            //if (current.right == null)
+            //    return current.left;
+
+            if (current.left == null)
+                return current.right;
+        }
+
+        // GO LEFT
+        if (current.data.compareTo(element) > 0) // TODO: Unchecked call to ...
+            current.left = deleteNoBalanceRecursive(current.left, element);
+
+        // GO RIGHT
+        if (current.data.compareTo(element) < 0)
+            current.right = deleteNoBalanceRecursive(current.right, element);
+
+        return current;
+    }
+
     /**
      * @inheritDoc
      */
@@ -239,7 +288,7 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
     {
         if (root == null)
             return false;
-        if (element == root.data)
+        if (element.equals(root.data))
             return true;
         if (root.data.compareTo(element) < 0)
             return containsRecursive(root.right, element);
@@ -394,25 +443,31 @@ public class AVLTree<T extends Comparable<T>> implements IAVLTree<T>
         m_root = null;
     }
 
-    /**
-     * @inheritDoc
-     */
-    // TODO: Changed toString(). Now writes compiled String into a .txt File aswell.
+    ///**
+    // * @inheritDoc
+    // */
+    //// TODO: Changed toString(). Now writes compiled String into a .txt File aswell.
+    //@Override
+    //public String toString()
+    //{
+    //    String s = "Name: " + m_name
+    //            + "\n\tisEmpty: " + isEmpty()
+    //            + "\n\tNumNodes: " + numNodes()
+    //            + "\n\tHeight: " + height()
+    //            + "\n\tPreOrder: " + traversePreOrder(m_root)
+    //            + "\n\tInOrder: " + traverseInOrder(m_root)
+    //            + "\n\tPostOrder: " + traversePostOrder(m_root)
+    //            + "\n\tIsBalanced: " + isBalanced(m_root)
+    //            + "\n\tBalanceFactorsInOrder: " + traverseBalanceFactorsInOrder(m_root)
+    //            + "\n\tPrintLevelWise: "  + "\n" + traverseLevelWise(m_root);
+    //    Util.writeToFile("AVLTree.txt", s);
+    //    return s;
+    //}
+
     @Override
     public String toString()
     {
-        String s = "Name: " + m_name
-                + "\n\tisEmpty: " + isEmpty()
-                + "\n\tNumNodes: " + numNodes()
-                + "\n\tHeight: " + height()
-                + "\n\tPreOrder: " + traversePreOrder(m_root)
-                + "\n\tInOrder: " + traverseInOrder(m_root)
-                + "\n\tPostOrder: " + traversePostOrder(m_root)
-                + "\n\tIsBalanced: " + isBalanced(m_root)
-                + "\n\tBalanceFactorsInOrder: " + traverseBalanceFactorsInOrder(m_root)
-                + "\n\tPrintLevelWise: "  + "\n" + traverseLevelWise(m_root);
-        Util.writeToFile("AVLTree.txt", s);
-        return s;
+        return traverseLevelWise(m_root);
     }
 
     /**
